@@ -6,6 +6,12 @@ from flask_cors import CORS
 import numpy as np
 from PIL import Image
 from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.resnet import preprocess_input
+import keras
+
+@keras.saving.register_keras_serializable(name='preprocess_input')
+def custom_preprocess_input(x):
+    return preprocess_input(x)
 
 
 app = Flask(__name__)
@@ -15,10 +21,10 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ✅ Load model
-model = load_model("model/plant_model.h5")
+model = load_model("model/best_resnet.h5", custom_objects={'preprocess_input': custom_preprocess_input})
 
 # ✅ Class labels
-classes = ["Healthy", "Rust", "Blight", "Spot"]
+classes = ["Blight", "Healthy", "Spot"]
 
 # ✅ Disease explanations
 DISEASE_INFO = {
@@ -55,7 +61,7 @@ CROP_SUGGESTIONS = {
 def preprocess_image(img_path):
     img = Image.open(img_path).convert("RGB")
     img = img.resize((224, 224))
-    img = np.array(img) / 255.0   # 🔥 IMPORTANT
+    img = np.array(img, dtype=np.float32)  # Removed / 255.0, ResNet's internal preprocess_input handles scaling
     img = np.expand_dims(img, axis=0)
     return img
 
@@ -115,7 +121,7 @@ def predict():
         suggestions = CROP_SUGGESTIONS.get(crop, CROP_SUGGESTIONS["Other"]).get(disease, [])
         
         # 🐛 DEBUG
-        print(f"DEBUG predict → crop='{crop}' disease='{disease}' suggestions={suggestions}")
+        print(f"DEBUG predict -> crop='{crop}' disease='{disease}' suggestions={suggestions}")
 
         return jsonify({
             "disease": disease,

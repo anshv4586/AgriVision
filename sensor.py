@@ -5,11 +5,12 @@ import serial.tools.list_ports
 
 # Global serial object
 ser = None
-PORT = 'COM10'
+PORTS = ['COM10', 'COM9']
 BAUD = 9600
+ACTIVE_PORT = None
 
 def init_serial(baud=9600):
-    global ser, BAUD
+    global ser, BAUD, ACTIVE_PORT
     BAUD = baud
     if ser:
         try:
@@ -17,12 +18,16 @@ def init_serial(baud=9600):
         except:
             pass
     
-    try:
-        ser = serial.Serial(PORT, BAUD, timeout=2)
-        print(f"Serial {PORT} Opened at {BAUD}")
-    except Exception as e:
-        print(f"Serial Error on {PORT}: {e}")
-        ser = None
+    for port in PORTS:
+        try:
+            ser = serial.Serial(port, BAUD, timeout=2)
+            print(f"Serial {port} Opened at {BAUD}")
+            ACTIVE_PORT = port
+            break
+        except Exception as e:
+            print(f"Serial Error on {port}: {e}")
+            ser = None
+            ACTIVE_PORT = None
 
 # Initial attempt
 init_serial()
@@ -34,7 +39,7 @@ def get_sensor_data():
     if not ser:
         # Try both common baud rates
         for b in [9600, 115200]:
-            print(f"Attempting {PORT} at {b}...")
+            print(f"Attempting connection at {b} baud...")
             init_serial(b)
             if ser: break
         if not ser: return None
@@ -53,7 +58,7 @@ def get_sensor_data():
             line = ser.readline().decode(errors='ignore').strip()
             if not line: continue
 
-            print(f"DEBUG: Read line from {PORT}: '{line}'")
+            print(f"DEBUG: Read line from {ACTIVE_PORT}: '{line}'")
 
             # 1. Check for alerts
             if "ALERT" in line:
