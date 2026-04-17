@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriVision AI — Plant Health Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #07100A;
+  --bg2:     #0A160C;
+  --card:    #0E1C11;
+  --card2:   #122016;
+  --border:  rgba(60,160,80,0.13);
+  --border2: rgba(60,160,80,0.24);
+  --green:   #3CA050;
+  --green2:  #5CC870;
+  --green3:  #174D25;
+  --lime:    #A2D96A;
+  --gold:    #D4A843;
+  --red:     #D95050;
+  --amber:   #D98040;
+  --text:    #DFF0DF;
+  --text2:   #8DB89A;
+  --text3:   #4A7058;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 65% 55% at 10% 10%,rgba(20,90,35,0.09) 0%,transparent 60%),radial-gradient(ellipse 55% 65% at 90% 90%,rgba(60,160,80,0.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(60,160,80,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(60,160,80,0.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(7,16,10,0.92);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{width:38px;height:38px;background:linear-gradient(145deg,var(--green3),var(--green));border-radius:11px;display:grid;place-items:center;font-size:20px;box-shadow:0 0 20px rgba(60,160,80,0.28);}
+.brand-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:900;letter-spacing:-0.3px;}
+.brand-name em{font-style:italic;color:var(--green2);}
+.status-pill{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--green2);background:rgba(60,160,80,0.08);border:1px solid var(--border2);padding:5px 14px;border-radius:20px;}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green2);animation:pulse 2.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(92,200,112,0.6);}50%{box-shadow:0 0 0 5px rgba(92,200,112,0);}}
+
+.hero{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:60px 24px 44px;text-align:center;}
+.hero-kicker{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:22px;opacity:0;animation:rise 0.7s ease 0.05s forwards;}
+.hero-kicker::before,.hero-kicker::after{content:'';width:30px;height:1px;background:var(--lime);opacity:0.5;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(42px,8vw,78px);font-weight:900;line-height:0.96;letter-spacing:-3px;margin-bottom:20px;opacity:0;animation:rise 0.7s ease 0.15s forwards;}
+.hero h1 em{font-style:italic;color:var(--green2);position:relative;}
+.hero h1 em::after{content:'';position:absolute;bottom:2px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--lime),var(--green2));border-radius:2px;opacity:0.6;}
+.hero p{font-size:15px;color:var(--text2);font-weight:300;line-height:1.9;max-width:430px;margin:0 auto;opacity:0;animation:rise 0.7s ease 0.25s forwards;}
+@keyframes rise{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+main{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 18px 100px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;margin-bottom:14px;overflow:hidden;box-shadow:0 4px 28px rgba(0,0,0,0.35);opacity:0;animation:rise 0.55s ease forwards;}
+.card:nth-child(1){animation-delay:0.3s;}
+.card:nth-child(2){animation-delay:0.42s;}
+.card-header{padding:13px 22px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:9px;}
+.ch-dot{width:7px;height:7px;border-radius:50%;}
+.ch-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);}
+.card-body{padding:22px;}
+
+.drop-zone{border:2px dashed rgba(60,160,80,0.22);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.22s;background:rgba(60,160,80,0.025);}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--green);background:rgba(60,160,80,0.07);}
+.dz-icon{font-size:42px;margin-bottom:13px;display:block;}
+.dz-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--green2);margin-bottom:5px;}
+.dz-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);}
+.photo-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.photo-btn{padding:13px 10px;background:rgba(60,160,80,0.08);border:1px solid var(--border2);border-radius:10px;color:var(--green2);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Lato',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;}
+.photo-btn:hover{background:rgba(60,160,80,0.18);border-color:var(--green);transform:translateY(-1px);}
+input[type=file]{display:none;}
+#preview-wrap{display:none;margin-top:14px;position:relative;}
+#preview-img{width:100%;border-radius:12px;max-height:230px;object-fit:cover;display:block;border:1px solid var(--border2);}
+#clear-btn{position:absolute;top:9px;right:9px;background:rgba(217,80,80,0.85);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;display:grid;place-items:center;}
+#clear-btn:hover{background:rgba(217,80,80,1);}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:480px){.field-row{grid-template-columns:1fr 1fr;}}
+.field label{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+.field input,.field select{width:100%;background:rgba(60,160,80,0.05);border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s,background 0.2s;appearance:none;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--green);background:rgba(60,160,80,0.09);}
+.field select option{background:#0A160C;color:var(--text);}
+.field-full{grid-column:1/-1;}
+.sensor-hints{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.hint{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--text3);}
+
+.analyze-btn{width:100%;padding:18px;background:linear-gradient(135deg,var(--green3) 0%,var(--green) 100%);border:none;border-radius:16px;color:#fff;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;cursor:pointer;margin-bottom:14px;transition:all 0.25s;box-shadow:0 8px 28px rgba(60,160,80,0.22);position:relative;overflow:hidden;letter-spacing:0.2px;}
+.analyze-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);transition:left 0.55s;}
+.analyze-btn:hover::before{left:100%;}
+.analyze-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(60,160,80,0.32);}
+
+.err-box{display:none;background:rgba(217,80,80,0.1);border:1px solid rgba(217,80,80,0.3);border-radius:11px;padding:13px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#ff9090;line-height:1.65;margin-bottom:14px;}
+
+#results{display:none;}
+.res-header{display:flex;align-items:center;gap:22px;padding:24px;border-bottom:1px solid var(--border);background:var(--card2);}
+.ring-container{position:relative;width:84px;height:84px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ring-container svg{position:absolute;top:0;left:0;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:rgba(60,160,80,0.1);stroke-width:6;}
+.ring-fg{fill:none;stroke:var(--green2);stroke-width:6;stroke-linecap:round;stroke-dasharray:214;stroke-dashoffset:214;transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1),stroke 0.3s;}
+.ring-pct{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--green2);position:relative;z-index:1;}
+.res-disease-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;line-height:1.15;margin-bottom:5px;}
+.res-pathogen-line{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:0.3px;margin-bottom:12px;}
+.sev-badge{display:inline-flex;align-items:center;padding:4px 13px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;}
+.sev-healthy{background:rgba(60,160,80,0.12);color:var(--green2);border:1px solid rgba(60,160,80,0.25);}
+.sev-low{background:rgba(212,168,67,0.12);color:#e8c060;border:1px solid rgba(212,168,67,0.25);}
+.sev-medium{background:rgba(217,128,64,0.12);color:#f0a060;border:1px solid rgba(217,128,64,0.25);}
+.sev-high{background:rgba(217,80,80,0.12);color:#ff9090;border:1px solid rgba(217,80,80,0.25);}
+
+.res-sections{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border);}
+@media(max-width:520px){.res-sections{grid-template-columns:1fr;}}
+.rs{padding:20px 18px;border-right:1px solid var(--border);}
+.rs:last-child{border-right:none;}
+.rs-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--green);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+.rs-label::before{content:'';width:14px;height:1px;background:var(--green);}
+.rs-text{font-size:13px;color:var(--text2);line-height:1.8;font-weight:300;}
+.rs-list{list-style:none;}
+.rs-list li{font-size:12px;color:var(--text2);padding:4px 0 4px 16px;position:relative;line-height:1.65;font-weight:300;}
+.rs-list li::before{content:'→';position:absolute;left:0;color:var(--lime);font-size:11px;top:5px;}
+
+.sensor-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px 22px;background:var(--card2);}
+.s-chip{text-align:center;background:rgba(60,160,80,0.05);border:1px solid var(--border);border-radius:12px;padding:14px 8px;}
+.s-chip-val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:4px;}
+.s-chip-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);}
+.sensor-note{display:none;padding:15px 22px;font-size:13px;color:var(--text2);font-style:italic;font-weight:300;line-height:1.75;background:rgba(162,217,106,0.04);border-top:1px solid var(--border);}
+.sensor-note::before{content:'// ';font-family:'JetBrains Mono',monospace;color:var(--lime);font-style:normal;font-size:11px;}
+
+footer{position:relative;z-index:1;text-align:center;padding:26px 20px;border-top:1px solid var(--border);}
+.footer-top{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;}
+.footer-divider{width:44px;height:1px;background:var(--border2);margin:12px auto 10px;}
+.footer-credit{font-family:'Playfair Display',serif;font-size:14px;color:var(--text2);font-style:italic;}
+.footer-credit span{color:var(--green2);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-icon">🌿</div>
+    <div class="brand-name">Agri<em>Vision</em></div>
+  </div>
+  <div class="status-pill"><div class="pulse"></div>SMART DIAGNOSIS</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-kicker">Plant Disease Detection</div>
+  <h1>Detect. Diagnose.<br><em>Save Your Crop.</em></h1>
+  <p>Upload a leaf photo, enter your sensor readings — get an instant diagnosis, severity rating, and full treatment plan for any plant.</p>
+</div>
+
+<main>
+
+  <!-- Card 1: Photo -->
+  <div class="card">
+    <div class="card-header">
+      <div class="ch-dot" style="background:var(--green2)"></div>
+      <span class="ch-label">Leaf Photo (Optional)</span>
+    </div>
+    <div class="card-body">
+      <div class="drop-zone" id="dropZone">
+        <span class="dz-icon">📷</span>
+        <div class="dz-title">Drop a leaf photo here</div>
+        <div class="dz-sub">JPG · PNG · any plant · optional</div>
+      </div>
+      <input type="file" id="fileGallery" accept="image/*">
+      <input type="file" id="fileCamera"  accept="image/*" capture="environment">
+      <div class="photo-btns" id="photoBtns">
+        <button class="photo-btn" onclick="document.getElementById('fileGallery').click()">🖼 Gallery</button>
+        <button class="photo-btn" onclick="document.getElementById('fileCamera').click()">📸 Take Photo</button>
+      </div>
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="Leaf preview">
+        <button id="clear-btn" onclick="clearImage()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Readings -->
+  <div class="card">
+    <div class="card-header">
+      <div class="ch-dot" style="background:var(--gold)"></div>
+      <span class="ch-label">Sensor Readings &amp; Plant</span>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Moisture %</label>
+          <input type="number" id="moisture" value="42" min="0" max="100" placeholder="0–100">
+        </div>
+        <div class="field">
+          <label>Temp °C</label>
+          <input type="number" id="temp" value="28" min="0" max="60" placeholder="°C">
+        </div>
+        <div class="field">
+          <label>Humidity %</label>
+          <input type="number" id="humidity" value="65" min="0" max="100" placeholder="0–100">
+        </div>
+        <div class="field field-full">
+          <label>Plant / Crop Type</label>
+          <select id="cropType">
+            <option value="">— Select your plant —</option>
+            <optgroup label="Field Crops">
+              <option>Rice</option>
+              <option>Wheat</option>
+              <option>Maize</option>
+              <option>Sugarcane</option>
+              <option>Mustard</option>
+              <option>Barley</option>
+              <option>Potato</option>
+            </optgroup>
+            <optgroup label="Vegetables">
+              <option>Tomato</option>
+              <option>Spinach</option>
+              <option>Coriander</option>
+              <option>Cabbage</option>
+            </optgroup>
+            <optgroup label="Flowers">
+              <option>Marigold</option>
+              <option>Rose</option>
+              <option>Bougainvillea</option>
+              <option>Tulip</option>
+              <option>Chrysanthemum</option>
+              <option>Dahlia</option>
+              <option>Petunia</option>
+              <option>Sunflower</option>
+            </optgroup>
+            <option value="Other">Other / Unknown Plant</option>
+          </select>
+        </div>
+      </div>
+      <div class="sensor-hints">
+        <span class="hint">Ideal moisture: 30–70%</span>
+        <span class="hint">Ideal temp: 18–32°C</span>
+        <span class="hint">Ideal humidity: 40–75%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="err-box" id="errBox"></div>
+
+  <button class="analyze-btn" onclick="runAnalysis()">✦ Analyze Plant Health</button>
+
+  <!-- Results -->
+  <div class="card" id="results">
+    <div class="res-header">
+      <div class="ring-container">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle class="ring-bg" cx="42" cy="42" r="34"/>
+          <circle class="ring-fg" id="ringFg" cx="42" cy="42" r="34"/>
+        </svg>
+        <span class="ring-pct" id="ringPct">0%</span>
+      </div>
+      <div>
+        <div class="res-disease-name" id="diseaseName"></div>
+        <div class="res-pathogen-line" id="pathogenLine"></div>
+        <span class="sev-badge" id="severityBadge"></span>
+      </div>
+    </div>
+    <div class="res-sections" id="resSections"></div>
+    <div class="sensor-chips" id="sensorChips"></div>
+    <div class="sensor-note" id="sensorNote"></div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-top">AgriVision AI &nbsp;·&nbsp; Btech CSE &nbsp;·&nbsp; Smart Plant Disease Detection</div>
+  <div class="footer-divider"></div>
+  <div class="footer-credit">Built by <span>Lazy Coders</span></div>
+</footer>
+
+<script>
+// ── Disease knowledge base per crop ──
+var DISEASES = {
+  "Rice": [
+    { disease:"Blast (Magnaporthe oryzae)", pathogen:"Magnaporthe oryzae", severity:"High",
+      moistureRange:[40,80], tempRange:[25,35], humidityRange:[75,100],
+      description:"Blast causes diamond-shaped lesions on leaves and can kill the growing tip, causing 'rotten neck'. It spreads rapidly in warm, humid conditions and is one of the most destructive rice diseases worldwide.",
+      treatment:["Apply Tricyclazole 75 WP @ 0.6 g/L water immediately","Remove and burn infected plant material","Apply second spray after 10–14 days if needed"],
+      prevention:["Use blast-resistant varieties like IR-64","Avoid excessive nitrogen fertilizer","Maintain proper plant spacing for air circulation"] },
+    { disease:"Brown Plant Hopper Attack", pathogen:"Nilaparvata lugens (insect)", severity:"Medium",
+      moistureRange:[60,100], tempRange:[26,32], humidityRange:[70,100],
+      description:"Hopperburn causes circular patches of yellowing and wilting rice plants. Insects suck phloem sap, weakening the plant. High humidity and dense planting favor outbreaks.",
+      treatment:["Apply Imidacloprid 200 SL @ 0.3 ml/L water","Avoid water stress during critical growth stages","Release Cyrtorhinus lividipennis as natural enemy"],
+      prevention:["Avoid excess nitrogen","Keep field bunds clean","Use light traps to monitor populations"] },
+  ],
+  "Wheat": [
+    { disease:"Yellow Rust (Stripe Rust)", pathogen:"Puccinia striiformis", severity:"High",
+      moistureRange:[30,70], tempRange:[10,20], humidityRange:[60,100],
+      description:"Yellow rust produces bright yellow-orange pustules in stripes along the leaves. It thrives in cool, moist conditions and spreads rapidly via wind, causing severe yield loss if unchecked.",
+      treatment:["Apply Propiconazole 25 EC @ 1 ml/L water","Spray at first sign of infection","Repeat after 15 days if disease persists"],
+      prevention:["Sow rust-resistant varieties (PBW 550, HD 2967)","Timely sowing — avoid late planting","Monitor fields regularly in February–March"] },
+    { disease:"Loose Smut", pathogen:"Ustilago tritici", severity:"Medium",
+      moistureRange:[20,50], tempRange:[16,22], humidityRange:[40,80],
+      description:"Loose smut replaces the grain head with a mass of black fungal spores. Infected heads emerge early, turn black, and release spores before other plants flower, spreading the disease.",
+      treatment:["Treat seeds with Carboxin 37.5% + Thiram 37.5% WP @ 2 g/kg","Remove infected heads immediately before spore release","Use certified disease-free seed"],
+      prevention:["Always use certified treated seed","Maintain field hygiene — remove crop debris","Practice 3-year crop rotation"] },
+  ],
+  "Maize": [
+    { disease:"Turcicum Leaf Blight", pathogen:"Exserohilum turcicum", severity:"Medium",
+      moistureRange:[50,80], tempRange:[20,30], humidityRange:[60,95],
+      description:"Turcicum blight causes long, elliptical, grayish-green to tan lesions on lower leaves that spread upward. Severe infections can cause premature leaf death and significant yield loss.",
+      treatment:["Spray Mancozeb 75 WP @ 2.5 g/L water","Remove and destroy heavily infected leaves","Apply copper-based fungicide as alternative"],
+      prevention:["Use resistant hybrids","Avoid overhead irrigation","Ensure proper field drainage"] },
+    { disease:"Fall Armyworm", pathogen:"Spodoptera frugiperda (insect)", severity:"High",
+      moistureRange:[30,70], tempRange:[22,35], humidityRange:[40,80],
+      description:"Fall armyworm larvae feed on leaves, creating characteristic 'windowpane' damage and large ragged holes. Frass (droppings) in the whorl is a diagnostic sign. Can destroy 50–100% of crop.",
+      treatment:["Apply Emamectin Benzoate 5 SG @ 0.4 g/L water into whorl","Use Chlorantraniliprole 18.5 SC @ 0.5 ml/L","Release egg parasitoid Telenomus remus"],
+      prevention:["Early sowing to avoid peak pest season","Intercrop with cowpea or sunflower","Regular field monitoring especially at whorl stage"] },
+  ],
+  "Tomato": [
+    { disease:"Early Blight", pathogen:"Alternaria solani", severity:"Medium",
+      moistureRange:[40,80], tempRange:[24,32], humidityRange:[60,100],
+      description:"Early blight causes dark brown lesions with concentric rings (target-board pattern) on older leaves. Infected leaves turn yellow and drop, reducing fruit yield and quality.",
+      treatment:["Apply Mancozeb 75 WP @ 2.5 g/L water every 7–10 days","Remove affected lower leaves immediately","Apply Chlorothalonil as alternate fungicide"],
+      prevention:["Use disease-free certified seed","Avoid wetting foliage during irrigation","Maintain adequate plant nutrition especially calcium"] },
+    { disease:"Late Blight", pathogen:"Phytophthora infestans", severity:"High",
+      moistureRange:[60,100], tempRange:[15,22], humidityRange:[80,100],
+      description:"Late blight causes water-soaked dark spots on leaves with white fungal growth underneath. Spreads extremely fast in cool, wet weather and can destroy an entire field within days.",
+      treatment:["Apply Metalaxyl + Mancozeb (Ridomil Gold) @ 2.5 g/L immediately","Remove and bury all infected plant material","Spray every 5–7 days during wet weather"],
+      prevention:["Avoid overhead irrigation","Ensure proper field drainage","Plant resistant varieties like Arka Rakshak"] },
+  ],
+  "Potato": [
+    { disease:"Late Blight", pathogen:"Phytophthora infestans", severity:"High",
+      moistureRange:[60,100], tempRange:[10,22], humidityRange:[80,100],
+      description:"Late blight in potato causes dark, water-soaked lesions on leaves and stems with white mold on leaf undersides. Tubers develop a reddish-brown rot. Devastating in cool, wet conditions.",
+      treatment:["Apply Metalaxyl + Mancozeb @ 2.5 g/L at 7-day intervals","Earth up plants to protect tubers","Apply Cymoxanil-based fungicide as alternate"],
+      prevention:["Use certified disease-free seed tubers","Avoid planting in waterlogged fields","Destroy volunteer plants and crop debris"] },
+    { disease:"Common Scab", pathogen:"Streptomyces scabies", severity:"Low",
+      moistureRange:[20,50], tempRange:[20,30], humidityRange:[30,60],
+      description:"Common scab causes rough, corky, brown lesions on tuber skin. It does not penetrate deep but reduces market value. Alkaline soils and dry conditions favor the pathogen.",
+      treatment:["Maintain soil pH below 5.5 using sulfur @ 50 kg/acre","Irrigate regularly during tuber initiation","Avoid applying fresh manure before planting"],
+      prevention:["Use scab-resistant varieties","Rotate with non-host crops for 3–4 years","Avoid liming before potato planting"] },
+  ],
+  "Sugarcane": [
+    { disease:"Red Rot", pathogen:"Colletotrichum falcatum", severity:"High",
+      moistureRange:[60,90], tempRange:[28,38], humidityRange:[65,100],
+      description:"Red rot causes reddening of internal stalk tissues with white patches and an alcoholic odor. Infected canes become hollow and dry. One of the most serious sugarcane diseases in India.",
+      treatment:["Remove and destroy infected ratoons immediately","Treat setts in Carbendazim 50 WP @ 1 g/L for 30 min before planting","Use biological control with Trichoderma viride"],
+      prevention:["Use disease-free resistant varieties (Co 86032)","Avoid water stagnation in fields","Never use infected canes as seed material"] },
+  ],
+  "Mustard": [
+    { disease:"White Rust (Albugo candida)", pathogen:"Albugo candida", severity:"Medium",
+      moistureRange:[40,80], tempRange:[10,20], humidityRange:[65,100],
+      description:"White rust causes chalky-white pustules on leaves, stems, and pods. Severe infections cause distortion and swelling of floral parts (staghead), drastically reducing seed set and oil yield.",
+      treatment:["Spray Metalaxyl + Mancozeb @ 2.5 g/L at first symptom","Repeat after 10 days","Apply Ridomil or Apron as seed treatment"],
+      prevention:["Use resistant varieties like RH-30","Avoid dense sowing","Remove and burn infected plant parts promptly"] },
+  ],
+  "Barley": [
+    { disease:"Powdery Mildew", pathogen:"Blumeria graminis f.sp. hordei", severity:"Medium",
+      moistureRange:[30,60], tempRange:[15,25], humidityRange:[50,80],
+      description:"Powdery mildew produces white powdery fungal growth on upper leaf surfaces. It reduces photosynthesis and weakens the plant. Cool temperatures with moderate humidity favor rapid spread.",
+      treatment:["Apply Propiconazole 25 EC @ 1 ml/L water","Spray Sulphur 80 WP @ 3 g/L as early treatment","Ensure thorough coverage of all leaf surfaces"],
+      prevention:["Sow resistant varieties","Avoid high nitrogen application","Maintain proper plant spacing"] },
+  ],
+  "Spinach": [
+    { disease:"Downy Mildew", pathogen:"Peronospora farinosa", severity:"Medium",
+      moistureRange:[55,90], tempRange:[10,20], humidityRange:[70,100],
+      description:"Downy mildew causes pale yellow patches on upper leaf surfaces with a gray-purple fuzzy growth underneath. Infected leaves become distorted and eventually die. Cool, wet weather triggers outbreaks.",
+      treatment:["Apply Metalaxyl + Mancozeb @ 2 g/L water","Reduce irrigation frequency","Apply Fosetyl-Al 80 WP @ 2.5 g/L as alternative"],
+      prevention:["Avoid overhead irrigation","Provide good air circulation between plants","Use resistant varieties if available"] },
+  ],
+  "Cabbage": [
+    { disease:"Black Rot", pathogen:"Xanthomonas campestris pv. campestris", severity:"High",
+      moistureRange:[40,80], tempRange:[25,35], humidityRange:[60,100],
+      description:"Black rot causes yellow V-shaped lesions at leaf margins progressing inward, with blackened leaf veins. The vascular tissue turns black. It spreads through infected seeds and rain splash.",
+      treatment:["Apply Copper Oxychloride 50 WP @ 3 g/L water","Remove infected leaves immediately","Treat seeds in hot water at 50°C for 30 minutes"],
+      prevention:["Use certified disease-free seeds","Practice 2-3 year crop rotation","Avoid working in fields when plants are wet"] },
+  ],
+  "Coriander": [
+    { disease:"Stem Gall", pathogen:"Protomyces macrosporus", severity:"Medium",
+      moistureRange:[40,75], tempRange:[15,25], humidityRange:[55,85],
+      description:"Stem gall causes soft, spongy galls or swellings on stems, petioles, and sometimes leaves. Infected plants are stunted. The disease is favored by cool, moist conditions in winter.",
+      treatment:["Spray Mancozeb 75 WP @ 2.5 g/L at early stage","Remove and destroy severely infected plants","Apply Carbendazim 50 WP @ 1 g/L as follow-up"],
+      prevention:["Use treated certified seed","Avoid overcrowding — maintain proper spacing","Practice 2-year crop rotation"] },
+  ],
+  "Marigold": [
+    { disease:"Damping Off", pathogen:"Pythium aphanidermatum", severity:"Medium",
+      moistureRange:[65,100], tempRange:[25,35], humidityRange:[70,100],
+      description:"Damping off causes seedling collapse at the soil level. The stem becomes water-soaked and constricted, causing the plant to topple over and die. Overwatering and poor drainage promote the disease.",
+      treatment:["Drench soil with Metalaxyl + Mancozeb @ 2 g/L water","Improve drainage immediately","Apply Trichoderma viride @ 4 g/L as biocontrol"],
+      prevention:["Avoid overwatering — allow topsoil to dry between irrigations","Use sterilized potting mix","Sow seeds at recommended spacing"] },
+  ],
+  "Rose": [
+    { disease:"Black Spot", pathogen:"Diplocarpon rosae", severity:"Medium",
+      moistureRange:[40,80], tempRange:[18,28], humidityRange:[60,100],
+      description:"Black spot causes circular black spots with fringed edges on leaves, leading to yellowing and premature leaf drop. It severely weakens the plant over time. Wet foliage is required for spore germination.",
+      treatment:["Spray Myclobutanil 10 WP @ 1 g/L water every 7 days","Remove all fallen leaves immediately","Apply Mancozeb as protective spray in wet season"],
+      prevention:["Water at base of plant — avoid wetting leaves","Prune to improve air circulation","Plant in sunny locations with good drainage"] },
+  ],
+  "Sunflower": [
+    { disease:"Alternaria Leaf Blight", pathogen:"Alternaria helianthi", severity:"Medium",
+      moistureRange:[50,85], tempRange:[25,35], humidityRange:[65,95],
+      description:"Alternaria blight causes small, angular, dark brown to black lesions on leaves that enlarge and coalesce, causing extensive defoliation. Warm, humid conditions trigger rapid spread.",
+      treatment:["Apply Mancozeb 75 WP @ 2 g/L water every 10 days","Start spraying at flower initiation stage","Use Iprodione 50 WP @ 1.5 g/L for severe infections"],
+      prevention:["Treat seeds with Thiram @ 3 g/kg before sowing","Maintain proper row spacing","Avoid overhead irrigation during flowering"] },
+  ],
+  "Tulip": [
+    { disease:"Botrytis Fire (Tulip Fire)", pathogen:"Botrytis tulipae", severity:"High",
+      moistureRange:[50,90], tempRange:[12,20], humidityRange:[70,100],
+      description:"Tulip fire causes scorched appearance on leaves and flowers with gray mold visible in humid conditions. Small brown sclerotia form on bulbs. One of the most serious tulip diseases in cold, wet seasons.",
+      treatment:["Remove and dispose of infected plant parts immediately","Apply Iprodione 50 WP @ 1 g/L water","Spray Chlorothalonil @ 2 g/L as protective measure"],
+      prevention:["Plant bulbs in well-drained beds","Space plants adequately for air circulation","Remove plant debris after season ends"] },
+  ],
+  "Chrysanthemum": [
+    { disease:"Chrysanthemum White Rust", pathogen:"Puccinia horiana", severity:"High",
+      moistureRange:[50,85], tempRange:[15,25], humidityRange:[70,100],
+      description:"White rust causes pale green spots on upper leaf surfaces with white or pink spore masses on lower surfaces. Infected flower heads are malformed and stunted. Spreads rapidly in humid conditions.",
+      treatment:["Apply Triadimefon 25 WP @ 1 g/L water","Quarantine infected plants immediately","Use Myclobutanil or Propiconazole as alternatives"],
+      prevention:["Use disease-free cuttings only","Disinfect tools and hands between plants","Maintain low humidity in greenhouses"] },
+  ],
+  "Dahlia": [
+    { disease:"Powdery Mildew", pathogen:"Erysiphe cichoracearum", severity:"Low",
+      moistureRange:[30,55], tempRange:[20,28], humidityRange:[45,75],
+      description:"Powdery mildew on dahlia appears as white powdery patches on leaves and stems. Despite looking severe, it rarely kills the plant but causes early leaf drop and reduces flowering. Dry conditions with moderate humidity favor it.",
+      treatment:["Spray Sulphur 80 WP @ 3 g/L water","Apply Propiconazole 25 EC @ 0.8 ml/L for severe infections","Wipe affected leaves with baking soda solution (5 g/L)"],
+      prevention:["Avoid overhead watering","Ensure good air circulation","Plant in sunny spots — avoid shaded areas"] },
+  ],
+  "Petunia": [
+    { disease:"Botrytis Blight", pathogen:"Botrytis cinerea", severity:"Medium",
+      moistureRange:[55,90], tempRange:[15,22], humidityRange:[70,100],
+      description:"Botrytis blight causes tan to brown spots on petals and leaves with gray mold in humid conditions. Infected flowers decay rapidly. Dead-heading and high humidity create ideal conditions for spread.",
+      treatment:["Remove and dispose of all faded flowers promptly","Apply Iprodione 50 WP @ 1 g/L water","Reduce humidity around plants by improving spacing"],
+      prevention:["Deadhead regularly to remove spent blooms","Avoid wetting flowers during watering","Ensure good drainage in containers"] },
+  ],
+  "Bougainvillea": [
+    { disease:"Leaf Spot", pathogen:"Cercospora bougainvilleae", severity:"Low",
+      moistureRange:[40,80], tempRange:[22,32], humidityRange:[55,85],
+      description:"Leaf spot causes circular, brown spots with yellow halos on leaves, leading to premature leaf drop. Severe infections weaken the plant and reduce the colorful bract display.",
+      treatment:["Spray Mancozeb 75 WP @ 2 g/L water","Remove fallen leaves from around the plant","Apply Copper Oxychloride @ 3 g/L as alternative"],
+      prevention:["Avoid overhead irrigation","Do not over-water — allow soil to dry","Prune to improve airflow"] },
+  ],
+};
+
+// ── Healthy assessment ──
+function assessHealthy(crop, m, t, h) {
+  var issues = [];
+  if (m < 25) issues.push("soil moisture is very low (drought stress risk)");
+  if (m > 80) issues.push("soil is waterlogged (root rot risk)");
+  if (t > 38) issues.push("temperature is critically high (heat stress)");
+  if (t < 8)  issues.push("temperature is too cold (frost/chilling injury risk)");
+  if (h > 85) issues.push("humidity is very high (fungal disease risk)");
+  if (h < 25) issues.push("humidity is very low (spider mite risk)");
+
+  if (issues.length === 0) {
+    return {
+      disease: "Healthy Plant ✓",
+      pathogen: "No disease detected",
+      severity: "Healthy",
+      confidence: 91,
+      description: "Your " + (crop||"plant") + " appears to be in excellent health. Sensor readings are within ideal ranges. Continue your current care routine and monitor regularly for any early signs of stress.",
+      treatment: ["Maintain current watering schedule","Apply balanced NPK fertilizer as scheduled","Continue regular field monitoring"],
+      prevention: ["Scout plants weekly for early symptoms","Maintain proper plant nutrition","Keep field/garden free of weeds and debris"],
+      sensor_note: "All sensor readings (moisture, temperature, humidity) are within the ideal range for " + (crop||"this plant") + ". Low disease risk."
+    };
+  } else {
+    return {
+      disease: "Environmental Stress",
+      pathogen: "Abiotic stress (non-infectious)",
+      severity: issues.length >= 2 ? "Medium" : "Low",
+      confidence: 80,
+      description: "No infectious disease detected, but the plant is experiencing environmental stress: " + issues.join("; ") + ". This can weaken the plant and make it more vulnerable to disease.",
+      treatment: [
+        m < 25 ? "Irrigate immediately — bring moisture to 40–60%" : m > 80 ? "Improve drainage — avoid waterlogging" : "Continue normal irrigation",
+        t > 38 ? "Provide shade during peak afternoon heat" : t < 8 ? "Cover plants to protect from cold damage" : "Maintain current temperature management",
+        h > 85 ? "Improve air circulation, reduce irrigation frequency" : h < 25 ? "Increase humidity with mulching or misting" : "Maintain current humidity levels"
+      ],
+      prevention: ["Monitor sensor readings daily","Adjust irrigation based on actual soil moisture","Mulch around plant base to regulate soil temperature"],
+      sensor_note: "Abiotic stress detected: " + issues.join(", ") + ". Address these conditions to prevent secondary disease infections."
+    };
+  }
+}
+
+// ── Match disease to sensor readings ──
+function matchDisease(cropName, m, t, h) {
+  m = parseFloat(m); t = parseFloat(t); h = parseFloat(h);
+
+  var list = DISEASES[cropName];
+  if (!list) {
+    // Generic fallback for unknown/other plants
+    var genericResult = assessHealthy(cropName || 'plant', m, t, h);
+    if (genericResult.severity === 'Healthy') {
+      return genericResult;
+    }
+    // High humidity generic fungal
+    if (h > 75 && m > 55) {
+      return {
+        disease: "Fungal Leaf Infection (General)",
+        pathogen: "Fungal pathogen (species TBD)",
+        severity: "Medium",
+        confidence: 70,
+        description: "Environmental conditions (high humidity + high moisture) are highly favorable for fungal diseases. While the exact pathogen requires lab identification, action should be taken immediately to prevent spread.",
+        treatment: ["Apply broad-spectrum Mancozeb 75 WP @ 2.5 g/L water","Remove and dispose of visibly infected leaves","Improve air circulation around plants"],
+        prevention: ["Reduce irrigation frequency","Avoid overhead watering","Space plants properly for airflow"],
+        sensor_note: "Humidity " + h + "% and moisture " + m + "% are both elevated — classic conditions triggering fungal outbreaks."
+      };
+    }
+    return genericResult;
+  }
+
+  // Score each disease by how well sensor readings match
+  var best = null, bestScore = -1;
+  for (var i = 0; i < list.length; i++) {
+    var d = list[i];
+    var score = 0;
+    if (m >= d.moistureRange[0]   && m <= d.moistureRange[1])   score += 3;
+    if (t >= d.tempRange[0]       && t <= d.tempRange[1])       score += 3;
+    if (h >= d.humidityRange[0]   && h <= d.humidityRange[1])   score += 3;
+    // Partial credit
+    if (m >= d.moistureRange[0]-10 && m <= d.moistureRange[1]+10) score += 1;
+    if (t >= d.tempRange[0]-5     && t <= d.tempRange[1]+5)     score += 1;
+    if (h >= d.humidityRange[0]-10 && h <= d.humidityRange[1]+10) score += 1;
+    if (score > bestScore) { bestScore = score; best = d; }
+  }
+
+  // If score is low, plant is likely healthy
+  if (bestScore < 4) {
+    return assessHealthy(cropName, m, t, h);
+  }
+
+  var confidence = Math.min(94, 60 + bestScore * 4);
+  return {
+    disease:     best.disease,
+    pathogen:    best.pathogen,
+    severity:    best.severity,
+    confidence:  confidence,
+    description: best.description,
+    treatment:   best.treatment,
+    prevention:  best.prevention,
+    sensor_note: buildSensorNote(best, m, t, h, cropName)
+  };
+}
+
+function buildSensorNote(d, m, t, h, crop) {
+  var notes = [];
+  if (m >= d.moistureRange[0] && m <= d.moistureRange[1])
+    notes.push("soil moisture " + m + "% is within the risk range for this disease");
+  if (t >= d.tempRange[0] && t <= d.tempRange[1])
+    notes.push("temperature " + t + "°C is optimal for pathogen activity");
+  if (h >= d.humidityRange[0] && h <= d.humidityRange[1])
+    notes.push("humidity " + h + "% promotes spore germination and spread");
+  if (notes.length === 0)
+    return "Sensor readings are partially outside ideal conditions but risk still exists — monitor closely.";
+  return "Risk elevated because: " + notes.join(", ") + ".";
+}
+
+// ── Image preview ──
+var imgLoaded = false;
+document.getElementById('fileGallery').addEventListener('change', function(e){ if(e.target.files[0]) loadFile(e.target.files[0]); });
+document.getElementById('fileCamera').addEventListener('change',  function(e){ if(e.target.files[0]) loadFile(e.target.files[0]); });
+var dz = document.getElementById('dropZone');
+dz.addEventListener('click', function(){ document.getElementById('fileGallery').click(); });
+dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', function(){  dz.classList.remove('dragover'); });
+dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('dragover'); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+function loadFile(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX = 1000, w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      document.getElementById('preview-img').src = canvas.toDataURL('image/jpeg', 0.85);
+      document.getElementById('preview-wrap').style.display = 'block';
+      dz.style.display = 'none';
+      document.getElementById('photoBtns').style.display = 'none';
+      imgLoaded = true;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearImage() {
+  imgLoaded = false;
+  document.getElementById('fileGallery').value = '';
+  document.getElementById('fileCamera').value  = '';
+  document.getElementById('preview-wrap').style.display = 'none';
+  dz.style.display = 'block';
+  document.getElementById('photoBtns').style.display = 'grid';
+  document.getElementById('results').style.display = 'none';
+}
+
+function showErr(msg){ var b=document.getElementById('errBox'); b.textContent=msg; b.style.display='block'; }
+function hideErr(){ document.getElementById('errBox').style.display='none'; }
+
+// ── Main analysis ──
+function runAnalysis() {
+  var m = document.getElementById('moisture').value;
+  var t = document.getElementById('temp').value;
+  var h = document.getElementById('humidity').value;
+  var c = document.getElementById('cropType').value || 'Other';
+
+  if (!m || !t || !h) { showErr('Please enter all three sensor readings (Moisture, Temp, Humidity).'); return; }
+  hideErr();
+
+  var result = matchDisease(c, m, t, h);
+  renderResults(result, m, t, h, c);
+}
+
+function renderResults(r, m, t, h, c) {
+  var conf = r.confidence || 80;
+
+  // Ring
+  var fg = document.getElementById('ringFg');
+  var ringColor = (r.severity === 'Healthy') ? 'var(--green2)' :
+                  (r.severity === 'Low')     ? '#e8c060' :
+                  (r.severity === 'Medium')  ? '#f0a060' : '#ff9090';
+  fg.style.stroke = ringColor;
+  document.getElementById('ringPct').style.color = ringColor;
+  document.getElementById('ringPct').textContent = conf + '%';
+  setTimeout(function(){ fg.style.strokeDashoffset = 214 - (conf/100)*214; }, 60);
+
+  // Header text
+  document.getElementById('diseaseName').textContent = r.disease;
+  document.getElementById('pathogenLine').textContent = (c === 'Other' ? 'Unknown Plant' : c) + '  ·  ' + r.pathogen;
+
+  var badge = document.getElementById('severityBadge');
+  var sevClass = r.severity === 'Healthy' ? 'sev-healthy' :
+                 r.severity === 'Low'     ? 'sev-low' :
+                 r.severity === 'Medium'  ? 'sev-medium' : 'sev-high';
+  badge.className = 'sev-badge ' + sevClass;
+  badge.textContent = r.severity === 'Healthy' ? '✓ HEALTHY' : 'Severity: ' + r.severity;
+
+  // 3 sections
+  var tx = (r.treatment||[]).map(function(x){ return '<li>'+x+'</li>'; }).join('');
+  var pv = (r.prevention||[]).map(function(x){ return '<li>'+x+'</li>'; }).join('');
+  document.getElementById('resSections').innerHTML =
+    '<div class="rs"><div class="rs-label">Observation</div><p class="rs-text">'+r.description+'</p></div>'+
+    '<div class="rs"><div class="rs-label">Treatment</div><ul class="rs-list">'+tx+'</ul></div>'+
+    '<div class="rs"><div class="rs-label">Prevention</div><ul class="rs-list">'+pv+'</ul></div>';
+
+  // Sensor chips with colour coding
+  var mc = m<25?'#ff9090':m>80?'#70b8ff':'var(--green2)';
+  var tc = t>38?'#ff9090':t<8?'#70b8ff':'var(--green2)';
+  var hc = h>85?'#f0a060':h<25?'#ff9090':'var(--green2)';
+  document.getElementById('sensorChips').innerHTML =
+    '<div class="s-chip"><div class="s-chip-val" style="color:'+mc+'">'+m+'%</div><div class="s-chip-lbl">Moisture</div></div>'+
+    '<div class="s-chip"><div class="s-chip-val" style="color:'+tc+'">'+t+'°C</div><div class="s-chip-lbl">Temperature</div></div>'+
+    '<div class="s-chip"><div class="s-chip-val" style="color:'+hc+'">'+h+'%</div><div class="s-chip-lbl">Humidity</div></div>';
+
+  // Sensor note
+  var sn = document.getElementById('sensorNote');
+  sn.textContent = r.sensor_note || '';
+  sn.style.display = r.sensor_note ? 'block' : 'none';
+
+  document.getElementById('results').style.display = 'block';
+  setTimeout(function(){ document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}); }, 80);
+}
+</script>
+</body>
+</html>
