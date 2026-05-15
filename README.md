@@ -1,4 +1,4 @@
-##📌 Overview
+### 📌 Overview:
 AgriVision is an AI-powered plant disease detection system that helps farmers and agricultural researchers identify crop diseases quickly and accurately using Deep Learning.
 
 The model is built using ResNet50 Transfer Learning Architecture and achieves an impressive 94.3% accuracy on the dataset.
