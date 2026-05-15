@@ -18,19 +18,17 @@ This project aims to support smart farming by enabling early disease detection, 
 This project uses:
 
 ResNet50 (Pre-trained CNN Model)
-
 Transfer Learning
-
 Image Augmentation
-
 TensorFlow / Keras Framework
 
 📊 Model Performance
-Metric	Value
-Model Architecture	ResNet50
-Accuracy	94.3%
-Framework	TensorFlow / Keras
-Task	Plant Disease Classification
+Metric	              Value
+Model Architecture	  ResNet50
+Accuracy	            94.3%
+Framework	            TensorFlow / Keras
+Task	                Plant Disease Classification
+
 🏗️ Project Structure
 AgriVision/
 │── dataset/
@@ -41,69 +39,61 @@ AgriVision/
 │── train_model.py
 │── requirements.txt
 │── README.md
+
 ⚙️ Installation
+
 1️⃣ Clone Repository
 git clone https://github.com/anshv4586/AgriVision.git
 cd AgriVision
+
 2️⃣ Create Virtual Environment
 python -m venv venv
+
 3️⃣ Activate Environment
 Windows
 venv\Scripts\activate
+
 Linux / Mac
 source venv/bin/activate
+
 4️⃣ Install Dependencies
 pip install -r requirements.txt
+
 ▶️ Run the Project
 python app.py
+
 📸 How It Works
+
 Upload plant leaf image
-
 Model processes image using ResNet50
-
 Disease prediction is generated
-
 Result displayed with high accuracy
 
 📚 Technologies Used
 Python
-
 TensorFlow
-
 Keras
-
 OpenCV
-
 NumPy
-
 Flask
-
 ResNet50
 
 Deep Learning
 
 🌱 Future Improvements
 Real-time disease detection
-
 Mobile application support
-
 Multi-language support
-
 More crop disease categories
-
 Cloud deployment
 
 🤝 Contributing
 Contributions are welcome!
 
 Fork the repository
-
 Create a new branch
-
 Commit your changes
-
 Push to your branch
-
 Create a Pull Request
 
 📜 License
