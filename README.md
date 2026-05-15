@@ -6,7 +6,7 @@ The model is built using ResNet50 Transfer Learning Architecture and achieves an
 
 This project aims to support smart farming by enabling early disease detection, reducing crop loss, and improving agricultural productivity.
 
-## 🚀 Features
+# 🚀 Features
 ✅ Plant Disease Detection using Deep Learning
 ✅ Built with ResNet50 CNN architecture
 ✅ Achieved 94.3% model accuracy
@@ -41,16 +41,16 @@ AgriVision/
 │── requirements.txt
 │── README.md
 
-# ⚙️ Installation
+## ⚙️ Installation
 
-#1️⃣ Clone Repository
+# 1️⃣ Clone Repository
 git clone https://github.com/anshv4586/AgriVision.git
 cd AgriVision
 
-#2️⃣ Create Virtual Environment
+# 2️⃣ Create Virtual Environment
 python -m venv venv
 
-#3️⃣ Activate Environment
+# 3️⃣ Activate Environment
 Windows
 venv\Scripts\activate
 
@@ -60,7 +60,7 @@ source venv/bin/activate
 # 4️⃣ Install Dependencies
 pip install -r requirements.txt
 
-#▶️ Run the Project
+# ▶️ Run the Project
 python app.py
 
 # 📸 How It Works
