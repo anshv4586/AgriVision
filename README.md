@@ -6,7 +6,7 @@ The model is built using ResNet50 Transfer Learning Architecture and achieves an
 
 This project aims to support smart farming by enabling early disease detection, reducing crop loss, and improving agricultural productivity.
 
-#🚀 Features
+## 🚀 Features
 ✅ Plant Disease Detection using Deep Learning
 ✅ Built with ResNet50 CNN architecture
 ✅ Achieved 94.3% model accuracy
@@ -15,7 +15,7 @@ This project aims to support smart farming by enabling early disease detection, 
 ✅ Fast and accurate inference
 ✅ Real-world agriculture use case
 
-#🧠 Deep Learning Model
+# 🧠 Deep Learning Model
 This project uses:
 
 ResNet50 (Pre-trained CNN Model)
@@ -23,14 +23,14 @@ Transfer Learning
 Image Augmentation
 TensorFlow / Keras Framework
 
-#📊 Model Performance
+# 📊 Model Performance
 Metric	              Value
 Model Architecture	  ResNet50
 Accuracy	            94.3%
 Framework	            TensorFlow / Keras
 Task	                Plant Disease Classification
 
-#🏗️ Project Structure
+# 🏗️ Project Structure
 AgriVision/
 │── dataset/
 │── model/
@@ -41,7 +41,7 @@ AgriVision/
 │── requirements.txt
 │── README.md
 
-#⚙️ Installation
+# ⚙️ Installation
 
 #1️⃣ Clone Repository
 git clone https://github.com/anshv4586/AgriVision.git
@@ -57,20 +57,20 @@ venv\Scripts\activate
 Linux / Mac
 source venv/bin/activate
 
-#4️⃣ Install Dependencies
+# 4️⃣ Install Dependencies
 pip install -r requirements.txt
 
 #▶️ Run the Project
 python app.py
 
-#📸 How It Works
+# 📸 How It Works
 
 Upload plant leaf image
 Model processes image using ResNet50
 Disease prediction is generated
 Result displayed with high accuracy
 
-#📚 Technologies Used
+# 📚 Technologies Used
 Python
 TensorFlow
 Keras
@@ -80,30 +80,30 @@ Flask
 ResNet50
 Deep Learning
 
-#🌱 Future Improvements
+# 🌱 Future Improvements
 Real-time disease detection
 Mobile application support
 Multi-language support
 More crop disease categories
 Cloud deployment
 
-#🤝 Contributing
+# 🤝 Contributing
 Contributions are welcome!
 Fork the repository
 Create a new branch
 Commit your changes
 Push to your branch
 Create a Pull Request
-
-#📜 License
+ 
+# 📜 License
 This project is licensed under the MIT License.
 
-#👨‍💻 Author
+# 👨‍💻 Author
 Ansh Verma
 GitHub: anshv4586
 
 Project Repository: AgriVision Repository
 
-#⭐ Support
+# ⭐ Support
 
 If you like this project, give it a ⭐ on GitHub!
