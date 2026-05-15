@@ -1,35 +1,3 @@
-logo
-more
-question-ai-logo
-managemanage
-managemanage
-useruser
-fullfull
-closeclose
-Chat AI
-Hello! Is there any question I can help you with?
-What is the purpose of student government in the United States?
-What are the main industries driving the U.S. economy?
-Ask AI
-
-
-
-https://github.com/anshv4586/AgriVision
-this is the git hub link of my project i want to change my redme file change by seeing the project.. The accruacy my model secure is 94.3 % uses RESNET50 and rest see your self by opening the project
-
-Your project looks strong for portfolio + GSSoC showcase, especially because it combines Deep Learning + Agriculture + ResNet50 with a real-world use case.
-You should make the README more professional, visually clean, and recruiter-friendly.
-
-Here’s a complete modern README.md you can directly replace in your repo:
-
-🌾 AgriVision — AI Powered Plant Disease Detection
-<div align="center">
-
-
-
-
-
-</div>
 📌 Overview
 AgriVision is an AI-powered plant disease detection system that helps farmers and agricultural researchers identify crop diseases quickly and accurately using Deep Learning.
 
